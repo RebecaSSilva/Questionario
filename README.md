@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # questionario
 
 ## Build Setup
@@ -67,3 +68,7 @@ More information about the usage of this directory in [the documentation](https:
 This directory contains your Vuex store files. Creating a file in this directory automatically activates Vuex.
 
 More information about the usage of this directory in [the documentation](https://nuxtjs.org/docs/2.x/directory-structure/store).
+=======
+# Questionario
+Questionário em Vue.js 2, Saas, Nuxt e consumindo api, não utilizei biblioteca de componentes.
+>>>>>>> b5186f07b4bb805b6ba1dc3e827a5eb5a578a2be
