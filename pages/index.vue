@@ -389,7 +389,7 @@ export default {
 .progress {
   height: 100%;
   width: 0;
-  background-color: #4caf50;
+  background-color: #C0CA33;
   border-radius: 4px;
   transition: width 0.3s ease;
 }
