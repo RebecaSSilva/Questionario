@@ -18,9 +18,9 @@
            <div style="text-align: center; padding: 20px;margin-top: 60px;">
             <i class="fa fa-paper-plane" style="font-size: 40px; margin-bottom: 10px;">
             </i>
-            <h2 style="font-size: 24px;">
+            <p style="font-size: 24px;">
             {{ formData.fields[currentFieldIndex].title }}
-            </h2>
+            </p>
             <p style="font-size: 16px; margin-top: 5px;">
             {{ formData.fields[currentFieldIndex].description }}
             </p>
@@ -35,11 +35,11 @@
                   formData.fields[currentFieldIndex].type === 'email'
                 "
               >
-                <h2 style="margin-top:90px;margin-bottom:10px">
-                {{ formData.fields[currentFieldIndex].title }}
-                </h2>
+                <p style="margin-top:90px;margin-bottom:10px;font-size: 24px;">
+                  {{ formData.fields[currentFieldIndex].title }}
+                </p>
                 <p>
-                {{ formData.fields[currentFieldIndex].description }}
+                  {{ formData.fields[currentFieldIndex].description }}
                 </p>
                 <div class="input" style="margin-top:0px">
                   <input
@@ -55,14 +55,21 @@
                       $event.target.value
                     )
                   "
-                  :required="formData.fields[currentFieldIndex].required"
+                  :class="{
+                    'invalid-field': !isFieldValid || (formData.fields[currentFieldIndex].required && !getFieldValue(formData.fields[currentFieldIndex]))
+                  }"   
                   :placeholder="
-                    formData.fields[currentFieldIndex].type === 'email'
-                      ? 'exemplo@exemplo.com'
-                      : 'Sua resposta...'
+                  formData.fields[currentFieldIndex].type === 'email'
+                    ? 'exemplo@exemplo.com'
+                    : 'Sua resposta...'
                   "
                   />
                 </div>
+                <span v-if="!isFieldValid" 
+                class="error-message"
+                >
+                  Essa resposta é obrigatória.
+                </span>
               </template>
 
               <template
@@ -70,11 +77,11 @@
                   formData.fields[currentFieldIndex].type === 'checkbox'
                 "
               >
-                <h2>
-                {{ formData.fields[currentFieldIndex].title }}
-                </h2>
+                <p style="font-size: 24px;">
+                  {{ formData.fields[currentFieldIndex].title }}
+                </p>
                 <p>
-                {{ formData.fields[currentFieldIndex].description }}
+                  {{ formData.fields[currentFieldIndex].description }}
                 </p>
                 <div class="field-item">
                   <div class="field-group mt16">
@@ -109,6 +116,11 @@
                     </div>
                   </div>
                 </div>
+                <span v-if="!isFieldValid" 
+                class="error-message"
+                >
+                  Essa resposta é obrigatória.
+                </span>
               </template>
 
               <div>
@@ -160,11 +172,7 @@ export default {
       currentFieldIndex: 0,
       formErrors: {},
       selectedOptions: [],
-      rules: {
-      checkbox: (value) => value.length > 0,
-      text: (value) => value !== undefined && value.trim() !== '',
-      email: (value) => value !== undefined && value.trim() !== '',
-    },
+      isFieldValid: true,
     };
   },
 
@@ -188,7 +196,6 @@ export default {
       try {
       const formDataId = 1; // ID do formulario,
       const formData = await this.fetchFormData(formDataId);
-      console.log(formData);
       // Inicializa o campo "value" do tipo "checkbox" como um array vazio, se não estiver definido
       formData.fields.forEach((field) => {
         if (field.type === "checkbox" && field.value === undefined) {
@@ -202,100 +209,114 @@ export default {
   },
 
   methods: {
-      toggleCheckbox(option) {
-        const index = this.selectedOptions.findIndex(
-          (selectedOption) => selectedOption.id === option.id
-        );
 
-        if (index !== -1) {
-          this.selectedOptions.splice(index, 1);
-        } else {
-          this.selectedOptions.push(option);
-        }
-      },
+    toggleCheckbox(option) {
+      const index = this.selectedOptions.findIndex(
+        (selectedOption) => selectedOption.id === option.id
+      );
 
-    async fetchFormData(formDataId) {
-        try {
-          const response = await fetch(
-            `https://65665153eb8bb4b70ef3297d.mockapi.io/api/forms/${formDataId}`
-          );
-          if (!response.ok) {
-            throw new Error(`Erro ao obter os dados do formulário: ${response.statusText}`);
-          }
-          const formData = await response.json();
-          return formData;
-        } catch (error) {
-          throw error;
-        }
-      },
-      
-      // Atualiza checkbox
-      updateCheckboxValue(fieldId, optionValue) {
-        const field = this.formData.fields.find((field) => field.id === fieldId);
-        const index = field.value.indexOf(optionValue);
-
-        if (index !== -1) {
-          field.value.splice(index, 1);
-        } else {
-          field.value.push(optionValue);
-        }
-      },
-      //Obtem valor dos campos
-      getFieldValue(field) {
-        return field.value;
-      },
-
-      //Atualiza valor dos campos
-      updateFieldValue(fieldId, value) {
-        this.$set(
-          this.formData.fields.find((field) => field.id === fieldId),
-          "value",
-          value
-        );
-      },
-    
-        //Passa para próxima questão
-        nextField() {
-          if (
-            this.currentFieldIndex < this.formData.fields.length - 1 
-          ) {
-            this.currentFieldIndex++;
-          } else {
-            console.log("Preencha todos os campos obrigatórios antes de avançar.");
-          }
-        },
-
-        //Volta para questão anterior
-        prevField() {
-          if (this.currentFieldIndex > 0) {
-            this.currentFieldIndex--;
-          }
-        },
-
-      async postResponse(responseData) {
-        try {
-          const response = await fetch(
-            "https://65665153eb8bb4b70ef3297d.mockapi.io/api/respondents",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(responseData),
-            }
-          );
-          if (!response.ok) {
-            throw new Error(`Erro ao enviar resposta: ${response.statusText}`);
-          }
-          const responseData = await response.json();
-        } catch (error) {
-          throw error;
-        }
-      },
+      if (index !== -1) {
+        this.selectedOptions.splice(index, 1);
+      } else {
+        this.selectedOptions.push(option);
+      }
     },
-  };
-</script>
 
+  async fetchFormData(formDataId) {
+      try {
+        const response = await fetch(
+          `https://65665153eb8bb4b70ef3297d.mockapi.io/api/forms/${formDataId}`
+        );
+        if (!response.ok) {
+          throw new Error(`Erro ao obter os dados do formulário: ${response.statusText}`);
+        }
+        const formData = await response.json();
+        return formData;
+      } catch (error) {
+        throw error;
+      }
+    },
+    
+    // Atualiza checkbox
+    updateCheckboxValue(fieldId, optionValue) {
+      const field = this.formData.fields.find((field) => field.id === fieldId);
+      const index = field.value.indexOf(optionValue);
+
+      if (index !== -1) {
+        field.value.splice(index, 1);
+      } else {
+        field.value.push(optionValue);
+      }
+    },
+    //Obtem valor dos campos
+    getFieldValue(field) {
+      return field.value;
+    },
+
+    //Atualiza valor dos campos
+    updateFieldValue(fieldId, value) {
+      this.$set(
+        this.formData.fields.find((field) => field.id === fieldId),
+        "value",
+        value
+      );
+    },
+
+   // Valida os campos para não serem nulos
+    validateField() {
+      const currentField = this.formData.fields[this.currentFieldIndex];
+
+      if (currentField.type === 'checkbox') {
+        // Valida checkbox
+        this.isFieldValid = this.selectedOptions.length > 0;
+      } else {
+        // Valida inputs
+        const fieldValue = this.getFieldValue(currentField);
+        this.isFieldValid = fieldValue ? fieldValue.trim() !== '' : false;
+      }
+    },
+
+    //Passa para próxima questão
+    nextField() {
+      this.validateField();
+      if (this.isFieldValid && this.currentFieldIndex < this.formData.fields.length - 1) {
+        this.currentFieldIndex++;
+      } else {
+        return false
+      }
+    },
+
+    //Volta para questão anterior
+    prevField() {
+        if (this.currentFieldIndex > 0) {
+          this.currentFieldIndex--;
+        }
+      },
+
+    async postResponse(responseData) {
+      try {
+        const response = await fetch(
+          "https://65665153eb8bb4b70ef3297d.mockapi.io/api/respondents",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(responseData),
+          }
+        );
+        if (!response.ok) {
+          throw new Error(`Erro ao enviar resposta: ${response.statusText}`);
+        }
+        const responseData = await response.json();
+      } catch (error) {
+        throw error;
+      }
+    },
+  },
+};
+</script>
+// Estilos 
 <style scoped lang="scss">
 .progress-bar {
   width: 100%;
@@ -351,6 +372,10 @@ export default {
   outline: none;
 }
 
+:root {
+  font-family:"Lato","Helvetica","Arial",sans-serif;
+}
+
 #app {
   height: 100vh;
   display: flex;
@@ -378,13 +403,24 @@ export default {
   margin-top: 21px;
   background-color: #c0ca33;
   color: black;
-  border: none;
+  border-color: #536DFE;
   cursor: pointer;
-  display: flex;
+  display: inline;
   align-items: center;
   justify-content: center;
 }
-
+.error-message{
+  background: #ff1744;
+  border-radius: 0 0 5px 5px;
+  color: #fff;
+  display: inline-block;
+  font-size: 12px;
+  margin-top: 0;
+  padding: 4px 8px;
+}
+.invalid-field{
+  border-bottom-color: #ff1744 !important;
+}
 .checkbox {
   border: 1px solid #cecece;
   box-sizing: border-box;
