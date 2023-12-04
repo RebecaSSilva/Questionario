@@ -1,5 +1,5 @@
 <template>
-  <v-app style="background-color: #263238">
+  <v-app style="background-color: #263238;">
     <v-main>
         <Nuxt />
     </v-main>
@@ -14,3 +14,4 @@ export default {
   },
 };
 </script>
+
