@@ -1,6 +1,6 @@
 <template>
   <v-app style="background-color: #263238;">
-    <v-main>
+    <v-main style="overflow: hidden;">
         <Nuxt />
     </v-main>
   </v-app>
@@ -14,4 +14,9 @@ export default {
   },
 };
 </script>
+<style>
+*{
+  overflow: hidden;
+}
+</style>
 
